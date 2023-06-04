@@ -8,6 +8,10 @@ typedef std::map< std::string, std::function<int(MenuOpt&)> > Opts;
 class SimpleListMenuImpl: public MenuImpl
 {
 private:
+/*
+TODO:
+* константная ссылка
+*/
 	Opts opts;
 
 	std::optional<MenuOpt> parse_cmd(const std::string &line);

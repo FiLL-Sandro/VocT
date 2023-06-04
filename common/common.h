@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <optional>
+#include <exception>
 
 #include "Log.h"
 

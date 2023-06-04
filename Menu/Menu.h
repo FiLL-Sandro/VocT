@@ -17,7 +17,7 @@ public:
 		if (!_args.empty())
 		{
 			name = _args.front();
-			args.insert(args.begin(), _args.begin(), _args.end());
+			args.insert(args.begin(), _args.begin() + 1, _args.end());
 		}
 	}
 

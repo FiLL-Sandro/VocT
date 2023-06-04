@@ -38,7 +38,7 @@ std::optional<MenuOpt> SimpleListMenuImpl::_get_cmd()
 
 	show_opts();
 
-	std::cin >> line;
+	std::getline(std::cin, line);
 	log.debug("line: %s\n", line.c_str());
 	return parse_cmd(line);
 }
