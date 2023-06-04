@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-static Log log(Log::LogLevel::LL_DEBUG);
+static Log log("utility", Log::LogLevel::LL_DEBUG);
 
 std::vector<std::string> common::split_string(const std::string &line, const std::string &delim)
 {

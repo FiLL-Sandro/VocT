@@ -10,7 +10,7 @@ void Log::print(LogLevel lvl, const char *lvl_prompt, const char *fmt, va_list a
 {
 	if (lvl <= level)
 	{
-		printf("%s", lvl_prompt);
+		printf("%s:%s", module_name.c_str(), lvl_prompt);
 		vprintf(fmt, ap);
 	}
 }

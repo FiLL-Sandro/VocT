@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-static Log log(Log::LogLevel::LL_DEBUG);
+static Log log("Menu", Log::LogLevel::LL_DEBUG);
 
 int Menu::run(void)
 {

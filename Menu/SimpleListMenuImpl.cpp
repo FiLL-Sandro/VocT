@@ -2,7 +2,7 @@
 
 #include "SimpleListMenuImpl.h"
 
-static Log log(Log::LogLevel::LL_DEBUG);
+static Log log("SimpleListMenuImpl", Log::LogLevel::LL_DEBUG);
 
 int SimpleListMenuImpl::_run(MenuOpt &opt)
 {
