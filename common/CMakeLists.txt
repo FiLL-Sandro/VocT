@@ -8,3 +8,6 @@ list(APPEND srcs
 add_library(common SHARED
             ${srcs}
             )
+target_include_directories(common INTERFACE
+                           ${CMAKE_CURRENT_SOURCE_DIR}
+                           )
