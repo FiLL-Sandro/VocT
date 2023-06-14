@@ -3,6 +3,7 @@ project(common)
 list(APPEND srcs
      Log.cpp
      utility.cpp
+     _thread.cpp
      )
 
 add_library(common SHARED
