@@ -18,11 +18,25 @@ std::vector<std::string> common::split_string(const std::string &line, const std
 		{
 			std::string string(tok);
 
-			log.debug("string == %s\n", string.c_str());
+			LOG_DEBUG("string == %s\n", string.c_str());
 			result.push_back(string);
 		}
 		free(line2);
 	}
 
 	return result;
+}
+
+std::string common::ModuleID2str(ModuleID id)
+{
+	switch(id)
+	{
+	case ModuleID::MID_MENU:
+		return "MENU";
+	case ModuleID::MID_DICTIONARY:
+		return "DICTIONARY";
+	default:
+		return "unknown";
+	}
+	return "unknown";
 }

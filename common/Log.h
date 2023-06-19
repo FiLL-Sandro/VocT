@@ -3,13 +3,13 @@
 #include <cstdarg>
 
 #include <string>
-#if 1
+
 #define LOG_ERROR(_fmt, ...) \
 	log.error("(%s:%d) " _fmt, __func__, __LINE__, ##__VA_ARGS__)
 
-#define LOG_DEBUG(...) \
+#define LOG_DEBUG(_fmt, ...) \
 	log.debug("(%s:%d) " _fmt, __func__, __LINE__, ##__VA_ARGS__)
-#endif
+
 class Log
 {
 public:
