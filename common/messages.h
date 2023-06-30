@@ -6,40 +6,47 @@ class Message;
 typedef std::shared_ptr<Message> Message_p;
 
 class CommandLineMessage;
+typedef std::shared_ptr<CommandLineMessage> CommandLineMessage_p;
+
 class CommandAddMessage;
+typedef std::shared_ptr<CommandAddMessage> CommandAddMessage_p;
+
 class CommandRemMessage;
+typedef std::shared_ptr<CommandRemMessage> CommandRemMessage_p;
 
-class MessageBuilder
+static inline Message_p make_CommandLineMessage(
+	common::ModuleID _sid,
+	common::ModuleID _rid,
+	const std::string &_line
+	)
 {
-public:
-	inline Message_p make_CommandLineMessage(
-		common::ModuleID _sid,
-		common::ModuleID _rid,
-		const std::string &_line
-		)
-	{
-		return std::make_shared<CommandLineMessage>(_sid, _rid, _line);
-	}
+	return std::dynamic_pointer_cast<Message>(
+	       	std::make_shared<CommandLineMessage>(_sid, _rid, _line)
+	       );
+}
 
-	inline Message_p make_CommandAddMessage(
-		common::ModuleID _sid,
-		common::ModuleID _rid,
-		const std::string &_w,
-		const std::string &_t
-		)
-	{
-		return std::make_shared<CommandAddMessage>(_sid, _rid, _w, _t);
-	};
+static inline Message_p make_CommandAddMessage(
+	common::ModuleID _sid,
+	common::ModuleID _rid,
+	const std::string &_w,
+	const std::string &_t
+	)
+{
+	return std::dynamic_pointer_cast<Message>(
+	       	std::make_shared<CommandAddMessage>(_sid, _rid, _w, _t)
+	       );
+}
 
-	inline Message_p make_CommandRemMessage(
-		common::ModuleID _sid,
-		common::ModuleID _rid,
-		const std::string &_w,
-		)
-	{
-		return std::make_shared<CommandRemMessage>(_sid, _rid, _w);
-	};
-};
+static inline Message_p make_CommandRemMessage(
+	common::ModuleID _sid,
+	common::ModuleID _rid,
+	const std::string &_w
+	)
+{
+	return std::dynamic_pointer_cast<Message>(
+	       	std::make_shared<CommandRemMessage>(_sid, _rid, _w)
+	       );
+}
 
 class Message
 {
@@ -53,8 +60,11 @@ public:
 	        common::ModuleID _rid,
 	        common::MessageID _id
 	        ):
-		sid(_sid), rid(_rid), id(_id), status(common::CommandStatus::IN_PROGRESS)
+		id(_id),
+		status(common::CommandStatus::IN_PROGRESS),
+		sid(_sid), rid(_rid)
 			{};
+	virtual ~Message() = default;
 };
 
 class CommandLineMessage: public Message
@@ -62,11 +72,11 @@ class CommandLineMessage: public Message
 public:
 	std::string line;
 
-	CommandLine() = delete;
-	CommandLine(common::ModuleID _sid,
-	            common::ModuleID _rid,
-	            const std::string &_line
-	            ):
+	CommandLineMessage() = delete;
+	CommandLineMessage(common::ModuleID _sid,
+	                   common::ModuleID _rid,
+	                   const std::string &_line
+	                   ):
 		Message(_sid, _rid,
 		        common::MessageID::CommandLineRequest
 		        ),
@@ -84,11 +94,10 @@ public:
 	               common::ModuleID _rid,
 	               common::CommandID _cmd
 	               ):
-		Message(_sid, _rid,
-		        common::MessageID::CommandRequest
-		        ),
+		Message(_sid, _rid, common::MessageID::CommandRequest),
 		cmd(_cmd)
 			{};
+	virtual ~CommandMessage() = default;
 };
 
 class CommandAddMessage: public CommandMessage
@@ -102,10 +111,7 @@ public:
 	                  const std::string &_w,
 	                  const std::string &_t
 	                  ):
-		CommandMessage(common::ModuleID _sid,
-		               common::ModuleID _rid,
-		               common::CommandID::ADD
-		               ),
+		CommandMessage(_sid, _rid, common::CommandID::ADD),
 		w(_w), t(_t)
 			{};
 };
@@ -120,10 +126,7 @@ public:
 	                  common::ModuleID _rid,
 	                  const std::string &_w
 	                  ):
-		CommandMessage(common::ModuleID _sid,
-		               common::ModuleID _rid,
-		               common::CommandID::REM
-		               ),
+		CommandMessage(_sid, _rid, common::CommandID::REM),
 		w(_w)
 			{};
 };
