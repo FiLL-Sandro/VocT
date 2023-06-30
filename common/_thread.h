@@ -6,59 +6,43 @@
 
 #include "common.h"
 
-typedef struct message_s
-{
-	message_s() = delete;
-	message_s(common::ModuleID _sid, common::ModuleID _rid, size_t _size);
-	~message_s();
-
-	common::ModuleID sid, rid;
-	size_t size;
-	void *data;
-} message_t;
-typedef std::shared_ptr<message_s> message_ptr;
-typedef std::list<message_ptr> queue;
+typedef std::list<Message_p> queue;
 
 class ipc
 {
-private:
+protected:
 	static std::array<
-		std::mutex,
-		static_cast<int>(common::ModuleID::MID_MAX)
+		std::timed_mutex,
+		static_cast<int>(common::ModuleID::MAX)
 	> lockers;
 	static std::array<
 		queue,
-		static_cast<int>(common::ModuleID::MID_MAX)
-	> queues;
+		static_cast<int>(common::ModuleID::MAX)
+	> queues_req, queues_rep;
 	common::ModuleID id;
 
+	int insert_msg(int _id, queue &q, Message_p msg);
 public:
 	ipc() = delete;
 	ipc(common::ModuleID _id);
 	~ipc();
 
-	message_ptr create_msg(common::ModuleID rid, size_t size);
-	int send_msg(message_ptr msg);
-	message_ptr recv_msg(void);
+	Message_p recv_rep(common::MessageID mid);
+	Message_p recv_req(void);
+	int send_rep(Message_p msg);
+	int send_req(Message_p msg);
 };
 
-class _thread
+class _thread: protected ipc
 {
 public:
-	virtual void operator()();
-	virtual int _run() = 0;
-	virtual bool maybe_exit() { return false; }
-};
-
-class _thread_with_ipc: public _thread, public ipc
-{
-public:
-	_thread_with_ipc() = delete;
-	_thread_with_ipc(common::ModuleID _id):
+	_thread() = delete;
+	_thread(common::ModuleID _id):
 		ipc(_id)
 			{}
 
 	void operator()();
-	int check_message();
-	virtual int _check_message(message_ptr msg) = 0;
+	virtual int check_message() = 0;
+	virtual int _run() = 0;
+	virtual bool maybe_exit() { return false; }
 };

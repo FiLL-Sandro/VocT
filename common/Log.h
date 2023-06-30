@@ -30,7 +30,7 @@ private:
 public:
 	Log() = delete;
 	Log(const std::string &name, LogLevel lvl):
-		module_name(name), level(lvl)
+		level(lvl), module_name(name)
 			{};
 
 	void error(const char *fmt, ...);

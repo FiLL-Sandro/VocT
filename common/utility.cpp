@@ -31,12 +31,16 @@ std::string common::ModuleID2str(ModuleID id)
 {
 	switch(id)
 	{
-	case ModuleID::MID_MENU:
-		return "MENU";
-	case ModuleID::MID_DICTIONARY:
-		return "DICTIONARY";
-	default:
-		return "unknown";
+		case ModuleID::MENU:
+			return "MENU";
+		case ModuleID::DICTIONARY:
+			return "DICTIONARY";
+		case ModuleID::TEST1:
+			return "TEST1";
+		case ModuleID::TEST2:
+			return "TEST2";
+		default:
+			return "unknown";
 	}
 	return "unknown";
 }
