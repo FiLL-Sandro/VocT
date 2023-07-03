@@ -3,6 +3,7 @@
 #include <list>
 #include <mutex>
 #include <array>
+#include <thread>
 
 #include "common.h"
 
@@ -12,7 +13,7 @@ class ipc
 {
 protected:
 	static std::array<
-		std::timed_mutex,
+		std::mutex,
 		static_cast<int>(common::ModuleID::MAX)
 	> lockers;
 	static std::array<
@@ -42,7 +43,7 @@ public:
 			{}
 
 	void operator()();
-	virtual int check_message() = 0;
 	virtual int _run() = 0;
+	virtual int check_message() { return 0; }
 	virtual bool maybe_exit() { return false; }
 };

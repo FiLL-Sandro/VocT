@@ -11,7 +11,7 @@ std::array<
 > ipc::queues_req, ipc::queues_rep;
 
 std::array<
-	std::timed_mutex,
+	std::mutex,
 	static_cast<int>(common::ModuleID::MAX)
 > ipc::lockers;
 
@@ -22,14 +22,14 @@ ipc::ipc(common::ModuleID _id):
 ipc::~ipc()
 {
 	int _id = ModuleID2int(id);
-	std::lock_guard<std::timed_mutex> l(ipc::lockers[_id]);
+	std::lock_guard<std::mutex> l(ipc::lockers[_id]);
 	ipc::queues_rep[_id].clear();
 	ipc::queues_req[_id].clear();
 }
 
 int ipc::insert_msg(int _id, queue &q, Message_p msg)
 {
-	std::lock_guard<std::timed_mutex> l(ipc::lockers[_id]);
+	std::lock_guard<std::mutex> l(ipc::lockers[_id]);
 	q.push_back(msg);
 	return 0;
 }
@@ -70,7 +70,7 @@ Message_p ipc::recv_req(void)
 {
 	int _id = ModuleID2int(id);
 	queue &q = ipc::queues_req[_id];
-	std::lock_guard<std::timed_mutex> l(ipc::lockers[_id]);
+	std::lock_guard<std::mutex> l(ipc::lockers[_id]);
 	Message_p p;
 
 	if (!q.empty())
@@ -88,12 +88,13 @@ Message_p ipc::recv_req(void)
 Message_p ipc::recv_rep(common::MessageID mid)
 {
 	int _id = ModuleID2int(id);
-	std::timed_mutex &m = ipc::lockers[_id];
+	std::mutex &m = ipc::lockers[_id];
 	Message_p p;
 
 	for (int i = 0; i < 5; ++i)
 	{
-		if (m.try_lock_for(std::chrono::seconds(1)))
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		if (m.try_lock())
 		{
 			queue &q = ipc::queues_rep[_id];
 			auto it = std::find_if(q.begin(), q.end(),
@@ -105,10 +106,11 @@ Message_p ipc::recv_rep(common::MessageID mid)
 				p = *it;
 				q.erase(it);
 
-				log.info("receive reply from %s\n", common::ModuleID2str(p->sid).c_str());
+				log.info("receive reply from %s\n", common::ModuleID2str(p->rid).c_str());
 				LOG_DEBUG("%s queue size == %lu\n",
 				          common::ModuleID2str(id).c_str(), q.size());
 			}
+			m.unlock();
 			goto exit;
 		}
 	}
