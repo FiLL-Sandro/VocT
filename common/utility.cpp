@@ -35,6 +35,8 @@ std::string common::ModuleID2str(ModuleID id)
 			return "MENU";
 		case ModuleID::DICTIONARY:
 			return "DICTIONARY";
+		case ModuleID::RECEIVER:
+			return "RECEIVER";
 		case ModuleID::TEST1:
 			return "TEST1";
 		case ModuleID::TEST2:

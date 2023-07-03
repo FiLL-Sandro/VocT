@@ -21,6 +21,7 @@ namespace common
 	{
 		MENU = 0,
 		DICTIONARY,
+		RECEIVER,
 		TEST1,
 		TEST2,
 		MAX,
