@@ -41,6 +41,9 @@ namespace common
 	{
 		ADD = 0,
 		REM,
+		OPEN,
+		CLOSE,
+		DUMP,
 		MAX
 	};
 
@@ -52,8 +55,10 @@ namespace common
 		MAX
 	};
 
-	std::string ModuleID2str(ModuleID id);
+	const char* ModuleID2str(ModuleID id);
+	const char* MessageID2str(MessageID id);
 	std::vector<std::string> split_string(const std::string &line, const std::string &delim);
+	bool file_exist(const std::string &filepath);
 }
 
 #include "messages.h"

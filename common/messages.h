@@ -8,11 +8,17 @@ typedef std::shared_ptr<Message> Message_p;
 class CommandLineMessage;
 typedef std::shared_ptr<CommandLineMessage> CommandLineMessage_p;
 
+class CommandMessage;
+typedef std::shared_ptr<CommandMessage> CommandMessage_p;
+
 class CommandAddMessage;
 typedef std::shared_ptr<CommandAddMessage> CommandAddMessage_p;
 
 class CommandRemMessage;
 typedef std::shared_ptr<CommandRemMessage> CommandRemMessage_p;
+
+class CommonCommandMessage;
+typedef std::shared_ptr<CommonCommandMessage> CommonCommandMessage_p;
 
 static inline Message_p make_CommandLineMessage(
 	common::ModuleID _sid,
@@ -45,6 +51,18 @@ static inline Message_p make_CommandRemMessage(
 {
 	return std::dynamic_pointer_cast<Message>(
 	       	std::make_shared<CommandRemMessage>(_sid, _rid, _w)
+	       );
+}
+
+static inline Message_p make_CommonCommandMessage(
+	common::ModuleID _sid,
+	common::ModuleID _rid,
+	common::CommandID _cmd,
+	const std::string &_line
+	)
+{
+	return std::dynamic_pointer_cast<Message>(
+	       	std::make_shared<CommonCommandMessage>(_sid, _rid, _cmd, _line)
 	       );
 }
 
@@ -128,5 +146,21 @@ public:
 	                  ):
 		CommandMessage(_sid, _rid, common::CommandID::REM),
 		w(_w)
+			{};
+};
+
+class CommonCommandMessage: public CommandMessage
+{
+public:
+	std::string line;
+
+	CommonCommandMessage() = delete;
+	CommonCommandMessage(common::ModuleID _sid,
+	                     common::ModuleID _rid,
+	                     common::CommandID _cmd,
+	                     const std::string &_line
+	                     ):
+		CommandMessage(_sid, _rid, _cmd),
+		line(_line)
 			{};
 };

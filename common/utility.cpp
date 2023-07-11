@@ -2,6 +2,10 @@
 
 #include "common.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 static Log log("utility", Log::LogLevel::LL_DEBUG);
 
 std::vector<std::string> common::split_string(const std::string &line, const std::string &delim)
@@ -27,7 +31,7 @@ std::vector<std::string> common::split_string(const std::string &line, const std
 	return result;
 }
 
-std::string common::ModuleID2str(ModuleID id)
+const char* common::ModuleID2str(ModuleID id)
 {
 	switch(id)
 	{
@@ -45,4 +49,30 @@ std::string common::ModuleID2str(ModuleID id)
 			return "unknown";
 	}
 	return "unknown";
+}
+
+const char* common::MessageID2str(MessageID id)
+{
+	switch(id)
+	{
+		case MessageID::CommandLineRequest:
+			return "CommandLineRequest";
+		case MessageID::CommandLineReply:
+			return "CommandLineReply";
+		case MessageID::CommandRequest:
+			return "CommandRequest";
+		case MessageID::CommandReply:
+			return "CommandReply";
+		default:
+			return "unknown";
+	}
+	return "unknown";
+}
+
+bool common::file_exist(const std::string &filepath)
+{
+	struct stat sb;
+	if (!stat(filepath.c_str(), &sb))
+		return true;
+	return false;
 }

@@ -45,7 +45,7 @@ int ipc::send_req(Message_p msg)
 	int _id = ModuleID2int(msg->rid);
 	if (!insert_msg(_id, ipc::queues_req[_id], msg))
 	{
-		log.info("send request to %s\n", common::ModuleID2str(msg->rid).c_str());
+		log.info("send request to %s\n", common::ModuleID2str(msg->rid));
 	}
 	return 0;
 }
@@ -87,7 +87,7 @@ int ipc::send_rep(Message_p msg)
 	int _id = ModuleID2int(msg->sid);
 	if (!insert_msg(_id, ipc::queues_rep[_id], msg))
 	{
-		log.info("send reply to %s\n", common::ModuleID2str(msg->sid).c_str());
+		log.info("send reply to %s\n", common::ModuleID2str(msg->sid));
 	}
 	return 0;
 }
@@ -111,9 +111,9 @@ Message_p ipc::recv_req(void)
 		p = q.front();
 		q.pop_front();
 
-		log.info("receive request from %s\n", common::ModuleID2str(p->sid).c_str());
+		log.info("receive request from %s\n", common::ModuleID2str(p->sid));
 		LOG_DEBUG("%s queue size == %lu\n",
-		          common::ModuleID2str(id).c_str(), q.size());
+		          common::ModuleID2str(id), q.size());
 	}
 	return p;
 }
@@ -139,9 +139,9 @@ Message_p ipc::recv_rep(common::MessageID mid)
 				p = *it;
 				q.erase(it);
 
-				log.info("receive reply from %s\n", common::ModuleID2str(p->rid).c_str());
+				log.info("receive reply from %s\n", common::ModuleID2str(p->rid));
 				LOG_DEBUG("%s queue size == %lu\n",
-				          common::ModuleID2str(id).c_str(), q.size());
+				          common::ModuleID2str(id), q.size());
 				m.unlock();
 				break;
 			}
