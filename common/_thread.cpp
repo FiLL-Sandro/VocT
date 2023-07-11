@@ -50,6 +50,32 @@ int ipc::send_req(Message_p msg)
 	return 0;
 }
 
+Message_p ipc::send_req_sync(Message_p msg, common::MessageID reply_id)
+{
+	Message_p reply;
+
+	if (send_req(msg))
+	{
+		LOG_ERROR("cannot send %s\n", common::MessageID2str(msg->id));
+		goto fail;
+	}
+
+	reply = recv_rep(reply_id);
+	if (!reply)
+	{
+		LOG_ERROR("%s aren't received\n", common::MessageID2str(reply_id));
+		goto fail;
+	}
+
+	if (reply->status != common::CommandStatus::SUCCESS)
+	{
+		LOG_ERROR("%s processing are failed\n", common::MessageID2str(msg->id));
+		reply.reset();
+	}
+fail:
+	return reply;
+}
+
 int ipc::send_rep(Message_p msg)
 {
 	if (!msg)
@@ -64,6 +90,13 @@ int ipc::send_rep(Message_p msg)
 		log.info("send reply to %s\n", common::ModuleID2str(msg->sid).c_str());
 	}
 	return 0;
+}
+
+int ipc::send_rep_error(Message_p msg, common::MessageID reply_id)
+{
+	msg->id = reply_id;
+	msg->status = common::CommandStatus::FAILED;
+	return send_rep(msg);
 }
 
 Message_p ipc::recv_req(void)
@@ -109,12 +142,12 @@ Message_p ipc::recv_rep(common::MessageID mid)
 				log.info("receive reply from %s\n", common::ModuleID2str(p->rid).c_str());
 				LOG_DEBUG("%s queue size == %lu\n",
 				          common::ModuleID2str(id).c_str(), q.size());
+				m.unlock();
+				break;
 			}
 			m.unlock();
-			goto exit;
 		}
 	}
-exit:
 	return p;
 }
 

@@ -31,7 +31,9 @@ public:
 	Message_p recv_rep(common::MessageID mid);
 	Message_p recv_req(void);
 	int send_rep(Message_p msg);
+	int send_rep_error(Message_p msg, common::MessageID reply_id);
 	int send_req(Message_p msg);
+	Message_p send_req_sync(Message_p msg, common::MessageID reply_id);
 };
 
 class _thread: protected ipc
