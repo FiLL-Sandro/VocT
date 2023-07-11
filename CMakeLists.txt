@@ -10,5 +10,5 @@ add_compile_options(-Wall -Werror
 
 add_subdirectory(common)
 add_subdirectory(Receiver)
-# add_subdirectory(Menu)
+add_subdirectory(Menu)
 # add_subdirectory(src)

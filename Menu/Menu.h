@@ -5,53 +5,29 @@
 #include <memory>
 
 #include <common.h>
+#include <_thread.h>
 
-class MenuOpt
+typedef std::pair< std::string, std::function<Message_p(std::vector<std::string>&)> > Opt;
+typedef std::map< std::string, std::function<Message_p(std::vector<std::string>&)> > Opts;
+
+/**
+ * Данный класс реализует парсинг и валидацию команд.
+ * Отсюда будут отправляться команды в Dictionary
+ */
+class Menu: public _thread
 {
+private:
+	static Opts opts;
+	bool are_showed;
+
+	void show_opts(void);
+	Message_p parse_cmd(const std::string &line);
 public:
-	std::string name;
-	std::vector<std::string> args;
-
-	MenuOpt(const std::vector<std::string> &_args)
-	{
-		if (!_args.empty())
-		{
-			name = _args.front();
-			args.insert(args.begin(), _args.begin() + 1, _args.end());
-		}
-	}
-
-	void dump(void)
-	{
-		printf("command %s:\n", name.c_str());
-		printf("args: ");
-		for (auto i : args)
-		{
-			printf("%s ", i.c_str());
-		}
-		printf("\n");
-	}
-};
-
-class MenuImpl
-{
-public:
-	virtual int _run(MenuOpt &opt) = 0;
-	virtual std::optional<MenuOpt> _get_cmd() { return std::optional<MenuOpt>(); };
-};
-
-class Menu
-{
-protected:
-	std::shared_ptr<MenuImpl> bridge;
-
-	inline std::optional<MenuOpt> get_cmd(void)
-		{ return bridge->_get_cmd(); }
-public:
-	Menu() = delete;
-	Menu(std::shared_ptr<MenuImpl> br):
-		bridge(br)
+	Menu():
+		_thread(common::ModuleID::MENU),
+		are_showed(false)
 			{}
 
-	int run(void);
+	int _run();
+	int check_message();
 };
