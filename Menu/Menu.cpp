@@ -6,6 +6,7 @@ static Message_p add_parser(std::vector<std::string> &args);
 static Message_p rem_parser(std::vector<std::string> &args);
 static Message_p open_parser(std::vector<std::string> &args);
 static Message_p close_parser(std::vector<std::string> &args);
+static Message_p dump_parser(std::vector<std::string> &args);
 
 Opts Menu::opts
 {
@@ -13,6 +14,7 @@ Opts Menu::opts
 	, {"rem", rem_parser}
 	, {"open", open_parser}
 	, {"close", close_parser}
+	, {"dump", dump_parser}
 };
 
 static Message_p add_parser(std::vector<std::string> &args)
@@ -72,16 +74,34 @@ static Message_p close_parser(std::vector<std::string> &args)
 {
 	Message_p p;
 
-	if (args.size() != 2)
+	if (args.size() != 1)
 	{
-		LOG_ERROR("wrong format of command: close <filepath>\n");
+		LOG_ERROR("wrong format of command: close\n");
 	}
 	else
 	{
-		p = make_CommonCommandMessage(common::ModuleID::MENU,
-		                              common::ModuleID::DICTIONARY,
-		                              common::CommandID::CLOSE,
-		                              args[1]);
+		p = make_CommandMessage(common::ModuleID::MENU,
+		                        common::ModuleID::DICTIONARY,
+		                        common::CommandID::CLOSE
+		                        );
+	}
+	return p;
+}
+
+static Message_p dump_parser(std::vector<std::string> &args)
+{
+	Message_p p;
+
+	if (args.size() != 1)
+	{
+		LOG_ERROR("wrong format of command: dump\n");
+	}
+	else
+	{
+		p = make_CommandMessage(common::ModuleID::MENU,
+		                        common::ModuleID::DICTIONARY,
+		                        common::CommandID::DUMP
+		                        );
 	}
 	return p;
 }

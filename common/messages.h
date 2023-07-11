@@ -31,6 +31,17 @@ static inline Message_p make_CommandLineMessage(
 	       );
 }
 
+static inline Message_p make_CommandMessage(
+	common::ModuleID _sid,
+	common::ModuleID _rid,
+	common::CommandID _cmd
+	)
+{
+	return std::dynamic_pointer_cast<Message>(
+	       	std::make_shared<CommandMessage>(_sid, _rid, _cmd)
+	       );
+}
+
 static inline Message_p make_CommandAddMessage(
 	common::ModuleID _sid,
 	common::ModuleID _rid,
