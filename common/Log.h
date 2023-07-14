@@ -3,6 +3,7 @@
 #include <cstdarg>
 
 #include <string>
+#include <cstdio>
 
 #define LOG_ERROR(_fmt, ...) \
 	log.error("(%s:%d) " _fmt, __func__, __LINE__, ##__VA_ARGS__)
@@ -24,14 +25,15 @@ public:
 private:
 	LogLevel level;
 	std::string module_name;
+	FILE *ofs;
 
 	void print(LogLevel lvl, const char *lvl_prompt, const char *fmt, va_list ap);
+	void fprint(LogLevel lvl, const char *lvl_prompt, const char *fmt, va_list ap);
 
 public:
 	Log() = delete;
-	Log(const std::string &name, LogLevel lvl):
-		level(lvl), module_name(name)
-			{};
+	Log(const std::string &name, LogLevel lvl);
+	~Log();
 
 	void error(const char *fmt, ...);
 	void debug(const char *fmt, ...);
