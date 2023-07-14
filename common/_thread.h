@@ -38,6 +38,10 @@ public:
 
 class _thread: protected ipc
 {
+protected:
+	static bool fatal;
+
+	inline void set_fatal_status(bool status) { fatal = true; }
 public:
 	_thread() = delete;
 	_thread(common::ModuleID _id):
@@ -47,5 +51,5 @@ public:
 	void operator()();
 	virtual int _run() = 0;
 	virtual int check_message() { return 0; }
-	virtual bool maybe_exit() { return false; }
+	virtual bool maybe_exit() { return fatal; }
 };

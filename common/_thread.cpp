@@ -15,6 +15,8 @@ std::array<
 	static_cast<int>(common::ModuleID::MAX)
 > ipc::lockers;
 
+bool _thread::fatal = false;
+
 ipc::ipc(common::ModuleID _id):
 	id(_id)
 		{}

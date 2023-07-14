@@ -42,5 +42,6 @@ int Receiver::_run()
 	}
 	return 0;
 fail:
+	set_fatal_status(true);
 	return -1;
 }
