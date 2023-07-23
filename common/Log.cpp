@@ -32,6 +32,7 @@ void Log::fprint(LogLevel lvl, const char *lvl_prompt, const char *fmt, va_list 
 	{
 		fprintf(ofs, "%s", lvl_prompt);
 		vfprintf(ofs, fmt, ap);
+		fflush(ofs);
 	}
 }
 
