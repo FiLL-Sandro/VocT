@@ -59,6 +59,7 @@ namespace common
 	const char* MessageID2str(MessageID id);
 	std::vector<std::string> split_string(const std::string &line, const std::string &delim);
 	bool file_exist(const std::string &filepath);
+	int create_file(const std::string &filepath);
 }
 
 #include "messages.h"

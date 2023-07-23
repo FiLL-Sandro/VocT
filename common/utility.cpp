@@ -71,8 +71,28 @@ const char* common::MessageID2str(MessageID id)
 
 bool common::file_exist(const std::string &filepath)
 {
+	if (filepath.empty())
+	{
+		LOG_ERROR("filepath is empty!!!\n");
+		return false;
+	}
+
 	struct stat sb;
 	if (!stat(filepath.c_str(), &sb))
 		return true;
 	return false;
+}
+
+int common::create_file(const std::string &filepath)
+{
+	if (file_exist(filepath))
+		return 1;
+
+	std::ofstream f(filepath);
+	if (f.good())
+	{
+		f.close();
+		return 0;
+	}
+	return -1;
 }

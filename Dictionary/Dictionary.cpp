@@ -23,16 +23,20 @@ int Dictionary::parse_dictionary(std::ifstream &dictionary)
 
 void Dictionary::save_dictionary()
 {
+	std::string _filepath{"/tmp/tmp.db"};
+
 	if (filepath.empty())
 	{
-		LOG_ERROR("cannot save temporary dictionary\n");
-		return;
+		LOG_DEBUG("filepath aren't set -- dictionary will be saved to \"%s\"\n",
+		          _filepath.c_str());
 	}
+	else
+		_filepath = filepath;
 
-	std::ofstream ofs{ filepath };
+	std::ofstream ofs{ _filepath };
 	if (!ofs.is_open())
 	{
-		LOG_ERROR("cannot open file %s\n", filepath.c_str());
+		LOG_ERROR("cannot open file %s\n", _filepath.c_str());
 		return;
 	}
 
@@ -44,34 +48,41 @@ void Dictionary::save_dictionary()
 
 void Dictionary::open_handler(CommonCommandMessage_p p, Message_p reply)
 {
-	std::ifstream ifs;
-
-	filepath = p->line;
-
-	if (!common::file_exist(filepath))
+	if (filepath.empty())
 	{
-		LOG_ERROR("%s aren't exist\n", filepath.c_str());
-		goto error;
-	}
+		std::ifstream ifs;
 
-	ifs.open(filepath);
-	if (!ifs.is_open())
+		filepath = p->line;
+
+		if (common::create_file(filepath) < 0)
+		{
+			LOG_ERROR("cannot create file: \"%s\"\n", filepath.c_str());
+			goto error;
+		}
+
+		ifs.open(filepath);
+		if (!ifs.is_open())
+		{
+			LOG_ERROR("cannot open %s\n", filepath.c_str());
+			goto error;
+		}
+
+		if (parse_dictionary(ifs))
+		{
+			LOG_ERROR("cannot parse the Dictionary\n");
+			goto error;
+		}
+	}
+	else
 	{
-		LOG_ERROR("cannot open %s\n", filepath.c_str());
-		goto error;
+		LOG_ERROR("dictionary already openned: \"%s\"\n", filepath.c_str());
 	}
-
-	if (parse_dictionary(ifs))
-	{
-		LOG_ERROR("cannot parse the Dictionary\n");
-		goto error;
-	}
-
 	reply->id = common::MessageID::CommandReply;
 	reply->status = common::CommandStatus::SUCCESS;
 	return;
 error:
 	filepath.clear();
+	db.clear();
 	reply->id = common::MessageID::CommandReply;
 	reply->status = common::CommandStatus::FAILED;
 	return;
@@ -79,11 +90,9 @@ error:
 
 void Dictionary::close_handler(Message_p reply)
 {
-	if (!filepath.empty())
-	{
-		save_dictionary();
-		filepath.clear();
-	}
+	save_dictionary();
+	filepath.clear();
+	db.clear();
 	reply->id = common::MessageID::CommandReply;
 	reply->status = common::CommandStatus::SUCCESS;
 	return;
