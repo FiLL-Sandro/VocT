@@ -1,29 +1,17 @@
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+
 #include "Dictionary.h"
 
 static Log log("Dictionary", Log::LogLevel::LL_DEBUG);
 
-int Dictionary::parse_dictionary(std::ifstream &dictionary)
-{
-	std::string line;
-
-	while (std::getline(dictionary, line).good())
-	{
-		std::vector<std::string> args{ common::split_string(line, ":") };
-
-		if (args.size() != 2)
-		{
-			LOG_ERROR("wrong format of entry(%s) in the Dictionary: <word>:<translate>\n", line.c_str());
-			return -1;
-		}
-
-		db.emplace(args[0], args[1]);
-	}
-	return 0;
-}
-
 void Dictionary::save_dictionary()
 {
-	std::string _filepath{"/tmp/tmp.db"};
+	std::string _filepath{"/tmp/tmp.json"};
 
 	if (filepath.empty())
 	{
@@ -33,25 +21,43 @@ void Dictionary::save_dictionary()
 	else
 		_filepath = filepath;
 
-	std::ofstream ofs{ _filepath };
-	if (!ofs.is_open())
-	{
-		LOG_ERROR("cannot open file %s\n", _filepath.c_str());
-		return;
-	}
+	db.dump2file(_filepath);
+}
 
-	for (auto i : db)
+char* Dictionary::read_file(const std::string &filepath, size_t &size)
+{
+	struct stat st;
+
+	if (!stat(filepath.c_str(), &st))
 	{
-		ofs << i.first << ":" << i.second << std::endl;
+		int fd = open(filepath.c_str(), O_RDONLY);
+		if (fd >= 0)
+		{
+			LOG_DEBUG("size of file: %ld\n", st.st_size);
+			void *content = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+			close(fd);
+			if (content)
+			{
+				size = st.st_size;
+				return static_cast<char*>(content);
+			}
+		}
+		else
+		{
+			LOG_ERROR("open: %s\n", strerror(errno));
+		}
 	}
+	else
+	{
+		LOG_ERROR("stat: %s\n", strerror(errno));
+	}
+	return NULL;
 }
 
 void Dictionary::open_handler(CommonCommandMessage_p p, Message_p reply)
 {
 	if (filepath.empty())
 	{
-		std::ifstream ifs;
-
 		filepath = p->line;
 
 		if (common::create_file(filepath) < 0)
@@ -60,17 +66,19 @@ void Dictionary::open_handler(CommonCommandMessage_p p, Message_p reply)
 			goto error;
 		}
 
-		ifs.open(filepath);
-		if (!ifs.is_open())
+		size_t size;
+		char *content = read_file(filepath, size);
+		if (content)
 		{
-			LOG_ERROR("cannot open %s\n", filepath.c_str());
-			goto error;
-		}
+			const char *_content = !size ? "{}" : content;
 
-		if (parse_dictionary(ifs))
-		{
-			LOG_ERROR("cannot parse the Dictionary\n");
-			goto error;
+			if (db.from_json(cJSON_Parse(_content)))
+			{
+				munmap(content, size);
+				LOG_ERROR("cannot parse the Dictionary\n");
+				goto error;
+			}
+			munmap(content, size);
 		}
 	}
 	else
@@ -110,7 +118,7 @@ void Dictionary::add_handler(CommandAddMessage_p p, Message_p reply)
 
 	LOG_DEBUG("try to add %s:%s\n", p->w.c_str(), p->t.c_str());
 
-	db.emplace(p->w, p->t);
+	db.add(p->w, p->t);
 	reply->id = common::MessageID::CommandReply;
 	reply->status = common::CommandStatus::SUCCESS;
 	return;
@@ -119,10 +127,7 @@ void Dictionary::add_handler(CommandAddMessage_p p, Message_p reply)
 void Dictionary::dump_handler(Message_p reply)
 {
 	printf("Dictionary content:\n");
-	for (auto i : db)
-	{
-		printf("%s:%s\n", i.first.c_str(), i.second.c_str());
-	}
+	db.dump2screen();
 
 	reply->id = common::MessageID::CommandReply;
 	reply->status = common::CommandStatus::SUCCESS;
@@ -140,11 +145,7 @@ void Dictionary::rem_handler(CommandRemMessage_p p, Message_p reply)
 	}
 
 	LOG_DEBUG("try to remove %s\n", p->w.c_str());
-	auto it = db.find(p->w);
-	if (it != db.end())
-	{
-		db.erase(it);
-	}
+	db.rem(p->w);
 
 	reply->id = common::MessageID::CommandReply;
 	reply->status = common::CommandStatus::SUCCESS;

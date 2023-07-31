@@ -3,8 +3,8 @@
 #include <common.h>
 #include <_thread.h>
 
-typedef std::map< std::string,std::string > Db;
-typedef std::pair< std::string,std::string > DbEntry;
+#include "cJSON.h"
+#include "Db.h"
 
 class Dictionary: public _thread
 {
@@ -14,6 +14,7 @@ private:
 
 	int parse_dictionary(std::ifstream &dictionary);
 	void save_dictionary();
+	static char* read_file(const std::string &filepath, size_t &size);
 
 	void open_handler(CommonCommandMessage_p p, Message_p reply);
 	void close_handler(Message_p reply);

@@ -2,6 +2,7 @@ project(Dictionary)
 
 list(APPEND srcs
      Dictionary.cpp
+     Db.cpp
      )
 
 add_library(Dictionary SHARED
